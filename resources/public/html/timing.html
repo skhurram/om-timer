@@ -1,0 +1,97 @@
+<html>
+  <head>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+  </head>
+  <body>
+    <div class="content" id="shell">
+      <form method="post" action="/addresults" name="clockform" id="clockform" style="width:100%">
+	<input name="title" type="hidden">
+	<input name="event-numbers" type="hidden">
+	<input name="userid" type="hidden">
+        <input name="event-ids" type="hidden">
+	<input id="active" type="hidden" value="false">
+	<input id="stopwatch-time" type="hidden">
+	<input id="timestamp" type="hidden">
+
+	<div id="timer" class="row">
+	  <div class="col-sm-3 left">
+	    <h4 class="event-name">Event 2. Short Course</h4>
+	    <input value="Start Timer" class="btn btn-default start" type="button" name="starter">
+	  </div>
+	  <div class="col-sm-6" style="text-align:center">
+	    <div class="clock-container">
+	      <p id="clock">Loading...</p>
+	      <input value="Click to Mark" class="btn btn-success mark" type="button" name="marker">
+	    </div>
+	    <a class="timing-notification-ok" href="#" data-toggle="tooltip" data-placement="bottom" data-original-title="All times have been automatically saved to the server. Stay online to ensure that all your data is backed up.">All changes saved to cloud.</a>
+	    <a class="timing-notification-error hide" href="#" data-toggle="tooltip" data-placement="bottom" data-original-title="Everything is still saved to your local borwser, but you cannot submit final results or save times to the cloud until you are back online.">You are offline! Your times are saved locally, but not to the cloud.</a>
+	  </div>
+	  <div class="col-sm-3 right">
+	    <a class="timing-tip" href="#" data-toggle="tooltip" data-placement="bottom" data-original-title="Once you start the timer, you can time the entire race using only your keyboard! Press enter to mark a finisher's time, then just type in their racer number. Repeat for all finishers. You can press tab on a Racer# cell to load in their info. DNF, DNS, and DQ are also valid times.">Tip: Press Enter to Mark.</a>
+	    <span class="badge badge-live" style="display:none">LIVE</span>
+	  </div>
+	</div>
+
+	<div class='hide invalid-input alert alert-danger fade in'><button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
+	  You have improperly formatted data!
+	</div>
+
+        <div class="react_shell">
+	  <table class="table table-striped table-responsive finishers">
+	  <thead>
+	    <tr>
+	      <td id="rank-header">Rank</td>
+	      <td>Racer#</td>
+	      <td>Time</td>
+	      <td>Actions</td>
+	      <td class="event-column">Event</td>
+	      <td style="min-width:190px">Racer Info</td>
+	    </tr>
+	  </thead>
+	  <tbody class="timestamps">
+	    <tr class="finisher">
+	      <td class="rank" style="padding-top:12px">1. </td>
+	      <td><input type="text" autocomplete="off" class="timing-boat-number form-control" name="racer-number1" data-rank="1" value="Loading..." placeholder="Enter Racer #"></td>
+	      <td><input type="text" autocomplete="off" class="timestamp form-control" name="time1" data-rank="1" value="Loading..." placeholder="Finish Time"></td>
+	      <td>
+		<a href="javascript:void(0);" class="remove" data-toggle="tooltip" data-rank="1" data-original-title="Delete this row">
+		  <img src="https://paddleguru.com/img/redx.png" alt="remove">
+		</a>
+		<a href="javascript:void(0);" class="insert" alt="insert" data-toggle="tooltip" data-rank="1" data-original-title="Insert a row below.">
+		  <img src="https://paddleguru.com/img/greenarrow.png">
+		</a>
+	      </td>
+	      <td class="roweventlabel 2" name="eventlabel1"></td>
+	      <td class="rowlabel 2" name="label1"></td>
+	    </tr>
+	  </tbody>
+	</table>
+        </div>
+
+	<div class="submit-results">
+	  <button class="btn-primary btn" type="submit" id="results-button" style="display:inline">Publish Results</button>
+	  <p class="timing-submit-note">Note: Once you publish, you can still make edits to times.</p>
+	</div>
+
+      </form>
+
+      <hr>
+      <p style="font-weight:bold">Remaining Paddlers:</p>
+      <div class="remaining-paddlers">
+	<p>Loading...</p>
+      </div>
+      <input value="Reset All Times" class="btn btn-danger" type="button" name="clearer" style="margin-bottom:20px">
+    </div>
+  </body>
+  <script src="../cljs/stopwatch.js"></script>
+  <script type="text/javascript">
+   $(document).keypress(function(e) {
+     if(e.which == 13) {
+       console.log('pressed!');
+       e.preventDefault();
+       $("input[type='text']:first:visible").focus();
+       return false;
+     }
+   });
+  </script>
+</html>
