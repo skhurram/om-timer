@@ -4,7 +4,7 @@
                  [org.clojure/core.async "0.1.267.0-0d7780-alpha"]
                  [org.clojure/clojurescript "0.0-2156"]
                  [prismatic/dommy "0.1.1"]
-                 [om "0.4.1"]
+                 [om "0.4.2"]
                  [kioo "0.2.0"]
                  [enfocus "2.0.2"]
                  [prismatic/schema "0.2.1"]

@@ -229,11 +229,11 @@
                                                       (when (:active? @stopwatch)
                                                         (om/transact! stopwatch result/mark-timestamp))))}))))
 
+
 (defn timing-shell [state owner]
   (kioo/component "public/html/timing.html"
                   [:div.content]
-                  {
-                   [:h4.event-name] (kioo/substitute nil)
+                  {[:h4.event-name] (kioo/substitute nil)
                    [:.clock-container] (kioo/content
                                         (om/build clock (:stopwatch state)))
                    #_#_[:tbody.timestamps] (let [results (:results (:stopwatch state))
@@ -255,7 +255,11 @@
                    ;; Because we're only timing a single event.
                    [:td.event-column] (kioo/substitute "")
                    [:td.roweventlabel] (kioo/substitute "")
-                   }))
+                   [:input (attr= :name "clearer")] (kioo/set-attr
+                                                     :onClick (fn [_]
+                                                                (when (js/confirm "Are you sure you want to clear the timing app for this event?")
+                                                                  (om/transact! state result/reset))))}))
+
 
 (om/root timing-shell
          timingapp
