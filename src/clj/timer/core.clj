@@ -24,16 +24,14 @@
 (html/deftemplate page
   (io/resource "public/index.html")
   [req]
-  [:body] (html/do->
-           (html/content (make-timing-page (-> req :params :regatta-title)))
-           (html/append
-            (html/html [:div {:id "react_shell"}]
-                       [:script {:src "http://fb.me/react-0.8.0.js"
-                                 :type "text/javascript"}]
-                       [:script {:src "/cljs/dev/generated.js"
-                                 :type "text/javascript"}]
-                       [:script (browser-connected-repl-js)]
-                       [:script "window.onload = paddleguru.client.timer.on_load;"]))))
+  [:body] (html/append
+           (html/html [:div {:id "react_shell"}]
+                      [:script {:src "http://fb.me/react-0.8.0.js"
+                                :type "text/javascript"}]
+                      [:script {:src "/cljs/dev/generated.js"
+                                :type "text/javascript"}]
+                      [:script (browser-connected-repl-js)]
+                      [:script "window.onload = paddleguru.client.timer.on_load;"])))
 
 (defroutes site
   (resources "/")
@@ -42,7 +40,7 @@
 (defn run
   []
   (defonce ^:private server
-    (ring.adapter.jetty/run-jetty #'site {:port 8080 :join? false}))
+    (ring.adapter.jetty/run-jetty #'site {:port 1234 :join? false}))
   server)
 
 (defn start! []

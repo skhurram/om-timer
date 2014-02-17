@@ -2,7 +2,7 @@
   (:require [clojure.set :as set]
             [schema.core :as s]
             [paddleguru.util :as u])
-  (                      :require-macros [schema.macros :as sm]))
+  (:require-macros [schema.macros :as sm]))
 
 ;; ## Records
 
@@ -127,8 +127,7 @@
   "Appends a ResultEntry with a new-time string (hh:mm:ss.ms) to the
   results in StopwatchState."
   [s :- StopwatchState]
-  (update-in s [:results] conj
-             (ResultEntry. "" 0 (u/ms-to-time (:stopwatch-time s)))))
+  (update-in s [:results] conj (ResultEntry. "" 0 (u/ms-to-time (:stopwatch-time s)))))
 
 (sm/defn update-time :- StopwatchState
   "Updates the supplied StopwatchState to the supplied timestamp."
