@@ -16,14 +16,13 @@
   ;; When we put this into production, go with
   ;; https://github.com/paddleguru/paddleguru/blob/e50654c616f153f709283ca6012b8afd48af71fe/project.clj
   ;; for the advanced compilation settings
-  :profiles {:dev {:repl-options {:init-ns timer.core}
-                   :uberjar {:main timer.core
-                             :prep-tasks [["cljsbuild" "clean"] ["cljsbuild" "once"]]}
+  :profiles {:uberjar {:prep-tasks [["cljsbuild" "clean"] ["cljsbuild" "once"]]}
+             :dev {:repl-options {:init-ns timer.core}
                    :plugins [[com.cemerick/austin "0.1.3"]
-                             [lein-cljsbuild "1.0.2"]]
-                   :cljsbuild {:builds [{:source-paths ["src/cljs"]
-                                         :compiler {:output-to "resources/public/cljs/dev/generated.js"
-                                                    :output-dir "resources/public/cljs/dev"
-                                                    :optimizations :whitespace
-                                                    :pretty-print true
-                                                    :source-map "resources/public/cljs/dev/generated.js.map"}}]}}})
+                             [lein-cljsbuild "1.0.2"]]}}
+  :cljsbuild {:builds [{:source-paths ["src/cljs"]
+                        :compiler {:output-to "resources/public/cljs/dev/generated.js"
+                                   :output-dir "resources/public/cljs/dev"
+                                   :optimizations :whitespace
+                                   :pretty-print true
+                                   :source-map "resources/public/cljs/dev/generated.js.map"}}]})
