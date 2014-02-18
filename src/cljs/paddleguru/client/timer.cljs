@@ -187,6 +187,8 @@
                                                      (kioo/add-class "error")
                                                      (kioo/remove-class "error"))))}))))
 
+
+
 (defn header-row []
   (kioo/component "public/html/timing.html"
                   [:table.finishers :thead]

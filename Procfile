@@ -1,0 +1,1 @@
+web: java $JVM_OPTS -cp target/timer-standalone.jar clojure.main -m timer.core $PORT
