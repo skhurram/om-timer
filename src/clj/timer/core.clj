@@ -34,8 +34,8 @@
                       [:script "window.onload = paddleguru.client.timer.on_load;"])))
 
 (defroutes site
-  (resources "/")
-  (GET "/races/:regatta-title/timing" [] page))
+  (GET "/" [] page)
+  (resources "/"))
 
 (defn run
   []

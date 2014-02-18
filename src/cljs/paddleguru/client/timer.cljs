@@ -229,7 +229,6 @@
                                                       (when (:active? @stopwatch)
                                                         (om/transact! stopwatch result/mark-timestamp))))}))))
 
-
 (defn timing-shell [state owner]
   (kioo/component "public/html/timing.html"
                   [:div.content]
@@ -261,6 +260,10 @@
                                                                   (om/transact! state result/reset))))}))
 
 
-(om/root timing-shell
-         timingapp
-         {:target (sel1 :.react_shell)})
+(defn om! []
+  (om/root timing-shell
+           timingapp
+           {:target (sel1 :.react_shell)}))
+
+(defn ^:export on-load []
+  (om!))
