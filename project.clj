@@ -1,5 +1,6 @@
 (defproject paddleguru/timer "0.1.1"
   :source-paths ["src/clj" "src/cljs"]
+  :min-lein-version "2.0.0"
   :uberjar-name "timer-standalone.jar"
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/core.async "0.1.267.0-0d7780-alpha"]
