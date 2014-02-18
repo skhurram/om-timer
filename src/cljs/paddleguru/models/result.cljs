@@ -2,7 +2,11 @@
   (:require [clojure.set :as set]
             [schema.core :as s]
             [paddleguru.util :as u])
+  (:import [goog.ui IdGenerator])
   (:require-macros [schema.macros :as sm]))
+
+(defn guid []
+  (.getNextUniqueId (.getInstance IdGenerator)))
 
 ;; ## Records
 
@@ -10,14 +14,15 @@
 
 ;;TODO: add entry ID in here, and change event number to event id!
 (sm/defrecord ResultEntry
-    [id :- (s/named s/Str "Racer number")
+    [uuid :- (s/named s/Str "Unique Result Entry ID")
+     id :- (s/named s/Str "Racer number")
      event-num :- (s/named s/Int "Event number")
      time :- (s/named s/Str "result time")])
 
 (sm/defn empty-entry :- ResultEntry
   "Returns an empty entry."
   []
-  (ResultEntry. "" 0 ""))
+  (ResultEntry. (guid) "" 0 ""))
 
 (sm/defrecord StopwatchState
     [active? :- (s/named boolean "stopwatch running?")
@@ -127,7 +132,7 @@
   "Appends a ResultEntry with a new-time string (hh:mm:ss.ms) to the
   results in StopwatchState."
   [s :- StopwatchState]
-  (update-in s [:results] conj (ResultEntry. "" 0 (u/ms-to-time (:stopwatch-time s)))))
+  (update-in s [:results] conj (ResultEntry. (guid) "" 0 (u/ms-to-time (:stopwatch-time s)))))
 
 (sm/defn update-time :- StopwatchState
   "Updates the supplied StopwatchState to the supplied timestamp."

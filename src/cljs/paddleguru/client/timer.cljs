@@ -12,9 +12,8 @@
   (:use-macros [dommy.macros :only [sel1]]
                [enfocus.macros :only [defsnippet clone-for]]))
 
+
 (enable-console-print!)
-
-
 
 ;; ## State
 
@@ -31,7 +30,7 @@
 (defn info-label [racer-num]
   (if (empty? racer-num)
     ""
-    (result/format-racer-info (get @athletes (str racer-num)))))
+    (result/format-racer-info (get (:athletes @timingapp) (str racer-num)))))
 
 ;; ## Actions
 
@@ -70,14 +69,14 @@
   (swap! timingapp
          (fn [{:keys [stopwatch] :as old-timingapp}]
            (let [cleaned (u/remove-spaces number)
-                 event-num (u/str-to-int (get-in @athletes [cleaned "event-number"]))
+                 event-num (u/str-to-int (get-in (:athletes @timingapp) [cleaned "event-number"]))
                  focus-rank (if (= (inc rank) (count (:results stopwatch)))
                               (inc rank) ;;marked, focus top
                               rank)]
              (autofocus-and-update old-timingapp
                                    focus-rank
                                    (result/change-racer-number stopwatch
-                                                               (dec rank)
+                                                               (- (count (:results stopwatch)) rank)
                                                                cleaned
                                                                event-num))))))
 
@@ -92,7 +91,7 @@
              (autofocus-and-update old-timingapp
                                    focus-rank
                                    (result/change-racer-time stopwatch
-                                                             (dec rank)
+                                                             (- (count (:results stopwatch)) rank)
                                                              (u/remove-spaces time)))))))
 
 (defn insert-row!
@@ -131,9 +130,9 @@
 ;;;;;;;;;;;;;;;;;ON LOAD;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn all-number-set []
-  (into #{} (keys @athletes)))
+  (into #{} (keys (:athletes @timingapp))))
 
-(defn finisher-row [focus-rank rank result owner]
+(defn finisher-row [{:keys [rank] :as result} owner {:keys [focus-rank]}]
   (reify
     om/IInitState
     (init-state [_]
@@ -144,35 +143,34 @@
     (render-state [_ {:keys [racer-text time-text needs-focus]}]
       (kioo/component "public/html/timing.html"
                       [:tr.finisher]
-                      {[:td.rank] (kioo/content (str rank "."))
+                      {[:td.rank] (kioo/content rank ".")
                        [:input.timing-boat-number] (kioo/do->
                                                     (if needs-focus
-                                                      (do (reset! needs-focus false)
+                                                      (do (om/set-state! owner :needs-focus false)
                                                           (kioo/set-attr :autoFocus true))
                                                       identity)
-                                                    (if ((some-fn empty? (all-number-set)) @racer-text)
+                                                    (if ((some-fn empty? (all-number-set)) racer-text)
                                                       (kioo/remove-class "error")
                                                       (kioo/add-class "error"))
                                                     (kioo/set-attr :name (str "racer-number" rank)
                                                                    :data-rank rank
                                                                    :data-event-number (:event-num result)
                                                                    :value racer-text
-                                                                   :onChange #(reset! racer-text (-> % .-target .-value))
-                                                                   :onBlur (fn [_] (change-racer-number! rank @racer-text))))
-                       [:input.timestamp] (let [time @time-text]
-                                            (kioo/do->
-                                             (kioo/set-attr :ref "timeField"
-                                                            :value time
-                                                            :placeholder (when (empty? time)
-                                                                           "hh:mm:ss.ms")
-                                                            :data-event-number (:event-num result)
-                                                            :data-rank rank
-                                                            :onChange #(reset! time-text (-> % .-target .-value))
-                                                            :onBlur (fn [_] (change-racer-time! rank @time-text))
-                                                            :name (str "time" rank))
-                                             (if (result/valid-racer-time? time)
-                                               (kioo/remove-class "error")
-                                               (kioo/add-class "error"))))
+                                                                   :onChange #(om/set-state! owner :racer-text (.. % -target -value))
+                                                                   :onBlur (fn [_] (change-racer-number! rank racer-text))))
+                       [:input.timestamp] (kioo/do->
+                                           (kioo/set-attr :ref "timeField"
+                                                          :value time-text
+                                                          :placeholder (when (empty? time-text)
+                                                                         "hh:mm:ss.ms")
+                                                          :data-event-number (:event-num result)
+                                                          :data-rank rank
+                                                          :onChange #(om/set-state! owner :time-text (.. % -target -value))
+                                                          :onBlur (fn [_] (change-racer-time! rank time-text))
+                                                          :name (str "time" rank))
+                                           (if (result/valid-racer-time? time-text)
+                                             (kioo/remove-class "error")
+                                             (kioo/add-class "error")))
                        [:a.remove] (kioo/set-attr :data-rank rank
                                                   :onClick (fn [_] (delete-row! rank)))
                        [:a.remove :img] (kioo/set-attr :src (:remove (:cdn @timingapp)))
@@ -194,30 +192,30 @@
                   [:table.finishers :thead]
                   {[:td.event-column] (kioo/substitute nil)}))
 
-(defn finisher-rows []
+(defn ranked [results]
+  (let [total (count results)]
+    (mapv (fn [idx result]
+            (assoc result :rank (- total idx)))
+          (range)
+          results)))
+
+(defn finisher-rows [results focus-cell]
   (kioo/component "public/html/timing.html"
                   [:table.finishers]
                   {[:thead] (kioo/substitute (header-row))
                    [:tbody] (kioo/content
-                             (let [{:keys [stopwatch focus-cell]} @timingapp]
-                               (reverse
-                                (map-indexed (fn [idx result]
-                                               [finisher-row {:result result
-                                                              :rank (inc idx)
-                                                              :key (or (not-empty (:id result))
-                                                                       (inc idx))
-                                                              :focus-rank focus-cell}])
-                                             (:results stopwatch)))))}))
+                             (om/build-all finisher-row (reverse
+                                                         (ranked results))
+                                           {:key :uuid
+                                            :opts {:focus-rank focus-cell}}))}))
 
 (defn clock [stopwatch owner]
   (reify
     om/IWillMount
     (will-mount [_]
-      (go (loop []
+      (go (while true
             (<! (timeout 10))
-            ;; This spot sometimes "Cannot read property 'firstChild' of undefined"
-            (om/transact! stopwatch #(result/update-time % (u/now)))
-            (recur))))
+            (om/transact! stopwatch #(result/update-time % (u/now))))))
     om/IRender
     (render [_]
       (kioo/component "public/html/timing.html"
@@ -237,11 +235,9 @@
                   {[:h4.event-name] (kioo/substitute nil)
                    [:.clock-container] (kioo/content
                                         (om/build clock (:stopwatch state)))
-                   #_#_[:tbody.timestamps] (let [results (:results (:stopwatch state))
-                                                 focus-rank (:focus-cell state)]
-                                             (kioo/content
-                                              (om/build-all (partial finisher-row focus-rank)
-                                                            (map-indexed #(assoc %2 :rank %1) results))))
+                   [:table.finishers] (kioo/substitute
+                                       (finisher-rows (:results (:stopwatch state))
+                                                      (:focus-cell state)))
                    [:div.remaining-paddlers] (let [results (:results (:stopwatch state))
                                                    all-numbers (into #{} (keys (:athletes state)))]
                                                (kioo/content
