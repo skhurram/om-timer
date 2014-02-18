@@ -204,10 +204,10 @@
                   [:table.finishers]
                   {[:thead] (kioo/substitute (header-row))
                    [:tbody] (kioo/content
-                             (om/build-all finisher-row (reverse
-                                                         (ranked results))
-                                           {:key :uuid
-                                            :opts {:focus-rank focus-cell}}))}))
+                             (reverse
+                              (om/build-all finisher-row results
+                                            {:key :uuid
+                                             :opts {:focus-rank focus-cell}})))}))
 
 (defn clock [stopwatch owner]
   (reify
